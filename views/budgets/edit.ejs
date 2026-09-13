@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Budget - ExpenseFlow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <h1>Edit Budget</h1>
+    <%- include('../partials/navbar') %>
+
+        <form action="/budgets/<%= budget._id %>/edit" method="POST">
+            <select name="category" required>
+                <% categories.forEach(function(cat) { %>
+                    <option value="<%= cat._id %>" <%=String(cat._id)===String(budget.category) ? 'selected' : '' %>>
+                        <%= cat.icon %>
+                            <%= cat.name %>
+                    </option>
+                    <% }); %>
+            </select>
+
+            <input type="month" name="month" value="<%= budget.month %>" required>
+
+            <input type="number" name="amount" value="<%= budget.amount %>" step="0.01" min="0" required>
+
+            <button type="submit">Update Budget</button>
+        </form>
+
+        <script src="/js/theme.js"></script>
+</body>
+
+</html>

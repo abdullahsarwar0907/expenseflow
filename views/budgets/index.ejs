@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budgets - ExpenseFlow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <h1>Your Budgets</h1>
+    <%- include('../partials/navbar') %>
+
+        <% if (budgetsWithSpending.length===0) { %>
+            <p>No budgets set yet.</p>
+            <% } else { %>
+                <% budgetsWithSpending.forEach(function(b) { %>
+                    <div class="budget-card">
+                        <h3>
+                            <%= b.budget.category.icon %>
+                                <%= b.budget.category.name %> — <%= b.budget.month %>
+                        </h3>
+                        <p>Budget: ₹<%= b.budget.amount %>
+                        </p>
+                        <p>Spent: ₹<%= b.spent %>
+                        </p>
+                        <p>Remaining: ₹<%= b.remaining %>
+                        </p>
+                        <% if (b.isExceeded) { %>
+                            <p class="warning">⚠ Budget Exceeded</p>
+                            <% } %>
+                                <a href="/budgets/<%= b.budget._id %>/edit">Edit</a>
+
+                                <form action="/budgets/<%= b.budget._id %>/delete" method="POST" style="display:inline;"
+                                    onsubmit="return confirm('Delete this budget?');">
+                                    <button type="submit">Delete</button>
+                                </form>
+                    </div>
+                    <% }); %>
+                        <% } %>
+
+                            <script src="/js/theme.js"></script>
+</body>
+
+</html>

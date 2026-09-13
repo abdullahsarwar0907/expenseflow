@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Categories - ExpenseFlow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <h1>Categories</h1>
+    <%- include('../partials/navbar') %>
+
+        <form action="/categories" method="POST">
+            <input type="text" name="name" placeholder="Category name" required>
+            <input type="text" name="icon" placeholder="Emoji icon (optional)" maxlength="2">
+            <button type="submit">Add Category</button>
+        </form>
+
+        <ul>
+            <% categories.forEach(function(cat) { %>
+                <li>
+                    <%= cat.icon %>
+                        <%= cat.name %>
+                            <% if (cat.isDefault) { %>
+                                <span>(default)</span>
+                                <% } else { %>
+                                    <form action="/categories/<%= cat._id %>/delete" method="POST"
+                                        style="display:inline;" onsubmit="return confirm('Delete this category?');">
+                                        <button type="submit">Delete</button>
+                                    </form>
+                                    <% } %>
+                </li>
+                <% }); %>
+        </ul>
+    <script src="/js/theme.js"></script>    
+</body>
+
+</html>

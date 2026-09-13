@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Transaction - ExpenseFlow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <h1>Add Transaction</h1>
+    <%- include('../partials/navbar') %>
+
+        <form action="/transactions" method="POST">
+            <input type="number" name="amount" placeholder="Amount" step="0.01" min="0" required>
+
+            <select name="type" required>
+                <option value="">Select Type</option>
+                <option value="income">Income</option>
+                <option value="expense">Expense</option>
+            </select>
+
+            <select name="category" required>
+                <option value="">Select Category</option>
+                <% categories.forEach(function(cat) { %>
+                    <option value="<%= cat._id %>">
+                        <%= cat.icon %>
+                            <%= cat.name %>
+                    </option>
+                    <% }); %>
+            </select>
+
+            <select name="paymentMethod">
+                <option value="cash">Cash</option>
+                <option value="upi">UPI</option>
+                <option value="card">Card</option>
+                <option value="netbanking">Net Banking</option>
+                <option value="other" selected>Other</option>
+            </select>
+
+            <input type="text" name="note" placeholder="Note (optional)">
+
+            <input type="date" name="date" required>
+
+            <label>
+                <input type="checkbox" name="isRecurring">
+                Make this recurring
+            </label>
+
+            <input type="number" name="recurringDay" placeholder="Day of month (1-28)" min="1" max="28">
+
+            <button type="submit">Add Transaction</button>
+        </form>
+    <script src="/js/theme.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transaction History - ExpenseFlow</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body>
+    <h1>Transaction History</h1>
+    <%- include('../partials/navbar') %>
+
+        <form action="/transactions" method="GET">
+            <input type="text" name="search" placeholder="Search notes, category, amount..."
+                value="<%= query.search || '' %>">
+
+            <select name="type">
+                <option value="">All Types</option>
+                <option value="income" <%=query.type==='income' ? 'selected' : '' %>>Income</option>
+                <option value="expense" <%=query.type==='expense' ? 'selected' : '' %>>Expense</option>
+            </select>
+
+            <select name="category">
+                <option value="">All Categories</option>
+                <% categories.forEach(function(cat) { %>
+                    <option value="<%= cat._id %>" <%=query.category===String(cat._id) ? 'selected' : '' %>>
+                        <%= cat.icon %>
+                            <%= cat.name %>
+                    </option>
+                    <% }); %>
+            </select>
+
+            <select name="paymentMethod">
+                <option value="">All Payment Methods</option>
+                <option value="cash" <%=query.paymentMethod==='cash' ? 'selected' : '' %>>Cash</option>
+                <option value="upi" <%=query.paymentMethod==='upi' ? 'selected' : '' %>>UPI</option>
+                <option value="card" <%=query.paymentMethod==='card' ? 'selected' : '' %>>Card</option>
+                <option value="netbanking" <%=query.paymentMethod==='netbanking' ? 'selected' : '' %>>Net Banking
+                </option>
+                <option value="other" <%=query.paymentMethod==='other' ? 'selected' : '' %>>Other</option>
+            </select>
+
+            <input type="month" name="month" value="<%= query.month || '' %>">
+
+            <button type="submit">Filter</button>
+            <a href="/transactions">Clear Filters</a>
+        </form>
+
+        <a href="/transactions/export/csv">Export CSV</a>
+        <a href="/transactions/export/pdf">Export PDF</a>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Category</th>
+                    <th>Type</th>
+                    <th>Amount</th>
+                    <th>Payment</th>
+                    <th>Note</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% if (transactions.length===0) { %>
+                    <tr>
+                        <td colspan="7">No transactions yet.</td>
+                    </tr>
+                    <% } else { %>
+                        <% transactions.forEach(function(tx) { %>
+                            <tr>
+                                <td>
+                                    <%= tx.date.toDateString() %>
+                                </td>
+                                <td>
+                                    <%= tx.category.icon %>
+                                        <%= tx.category.name %>
+                                </td>
+                                <td class="<%= tx.type %>">
+                                    <%= tx.type %>
+                                </td>
+                                <td>₹<%= tx.amount %>
+                                </td>
+                                <td>
+                                    <%= tx.paymentMethod %>
+                                </td>
+                                <td>
+                                    <%= tx.note || "-" %>
+                                </td>
+                                <td>
+                                    <a href="/transactions/<%= tx._id %>/edit">Edit</a>
+                                </td>
+                            </tr>
+                            <% }); %>
+                                <% } %>
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            <% if (currentPage> 1) { %>
+                <a href="/transactions?page=<%= currentPage - 1 %>">Previous</a>
+                <% } %>
+
+                    <span>Page <%= currentPage %> of <%= totalPages %></span>
+
+                    <% if (currentPage < totalPages) { %>
+                        <a href="/transactions?page=<%= currentPage + 1 %>">Next</a>
+                        <% } %>
+        </div>
+    <script src="/js/theme.js"></script>
+</body>
+
+</html>

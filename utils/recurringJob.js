@@ -69,22 +69,35 @@ function startRecurringJob() {
 
                 const spent = transactions.reduce((sum, tx) => sum + tx.amount, 0);
 
-                console.log(
-    `Budget: ₹${budget.amount} | Spent: ₹${spent} | Category: ${budget.category.name}`
+                const remaining = budget.amount - spent;
+
+console.log(
+    `${budget.category.name} | Budget: ₹${budget.amount} | Spent: ₹${spent} | Remaining: ₹${remaining}`
 );
 
-                if (spent > budget.amount) {
-                    const user = await User.findById(budget.userId);
-                console.log("Budget exceeded. Sending email to:", user.email);
-                    await sendEmail(
-                        user.email,
-                        "Budget Exceeded - ExpenseFlow",
-                        `Your ${budget.category.name} budget of ₹${budget.amount} for ${budget.month} has been exceeded. You've spent ₹${spent} so far.`
-                    );
-                    console.log("Email sent successfully");
-                    budget.alertSent = true;
-                    await budget.save();
-                }
+if (spent >= budget.amount) {
+    const user = await User.findById(budget.userId);
+
+    if (!user) {
+        console.log("User not found for budget:", budget._id);
+        return;
+    }
+
+    const status = spent > budget.amount ? "exceeded" : "reached";
+
+    console.log(`Budget ${status}. Sending email...`);
+
+    await sendEmail(
+        user.email,
+        `Budget ${status === "exceeded" ? "Exceeded" : "Reached"} - ExpenseFlow`,
+        `Your ${budget.category.name} budget of ₹${budget.amount} for ${budget.month} has been ${status}. You've spent ₹${spent} so far.`
+    );
+
+    console.log("Email sent successfully");
+
+    budget.alertSent = true;
+    await budget.save();
+}
             }
         } catch (err) {
             console.error("Budget alert job failed:", err);

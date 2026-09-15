@@ -8,6 +8,7 @@ function startRecurringJob() {
     cron.schedule("* * * * *", async () => {
         console.log("Running recurring transactions check...");
 
+        
         const today = new Date();
         const currentDay = today.getDate();
 

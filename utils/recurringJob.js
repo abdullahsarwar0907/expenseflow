@@ -54,7 +54,7 @@ function startRecurringJob() {
 
         try {
             const budgets = await Budget.find({ alertSent: false }).populate("category");
-
+            console.log("Budgets found:", budgets.length);
             for (const budget of budgets) {
                 const [year, monthNum] = budget.month.split("-");
                 const startDate = new Date(`${year}-${monthNum}-01`);
@@ -69,15 +69,19 @@ function startRecurringJob() {
 
                 const spent = transactions.reduce((sum, tx) => sum + tx.amount, 0);
 
+                console.log(
+    `Budget: ₹${budget.amount} | Spent: ₹${spent} | Category: ${budget.category.name}`
+);
+
                 if (spent > budget.amount) {
                     const user = await User.findById(budget.userId);
-
+                console.log("Budget exceeded. Sending email to:", user.email);
                     await sendEmail(
                         user.email,
                         "Budget Exceeded - ExpenseFlow",
                         `Your ${budget.category.name} budget of ₹${budget.amount} for ${budget.month} has been exceeded. You've spent ₹${spent} so far.`
                     );
-
+                    console.log("Email sent successfully");
                     budget.alertSent = true;
                     await budget.save();
                 }

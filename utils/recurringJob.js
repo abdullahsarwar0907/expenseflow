@@ -5,7 +5,7 @@ const User = require("../models/user");
 const sendEmail = require("./sendEmail");
 
 function startRecurringJob() {
-    cron.schedule("0 1 * * *", async () => {
+    cron.schedule("* * * * *", async () => {
         console.log("Running recurring transactions check...");
 
         const today = new Date();
@@ -48,11 +48,12 @@ function startRecurringJob() {
         }
     });
 
-    cron.schedule("0 2 * * *", async () => {
+    cron.schedule("* * * * *", async () => {
         console.log("Running budget alert check...");
 
         try {
             const budgets = await Budget.find({ alertSent: false }).populate("category");
+            console.log("Budgets found:", budgets.length);
 
             for (const budget of budgets) {
                 const [year, monthNum] = budget.month.split("-");
@@ -67,18 +68,53 @@ function startRecurringJob() {
                 });
 
                 const spent = transactions.reduce((sum, tx) => sum + tx.amount, 0);
+                const remaining = budget.amount - spent;
 
-                if (spent > budget.amount) {
+                console.log(
+                    `${budget.category.name} | Budget: ₹${budget.amount} | Spent: ₹${spent} | Remaining: ₹${remaining}`
+                );
+
+                if (spent >= budget.amount) {
                     const user = await User.findById(budget.userId);
 
-                    await sendEmail(
+                    if (!user) {
+                        console.log("User not found for budget:", budget._id);
+                        continue;
+                    }
+
+                    const status = spent > budget.amount ? "exceeded" : "reached";
+                    console.log(`Budget ${status}. Sending email...`);
+
+                    const emailText = `Your ${budget.category.name} budget of Rs.${budget.amount} for ${budget.month} has been ${status}. You've spent Rs.${spent} so far.`;
+
+                    const emailHtml = `
+  <div style="font-family: Arial, sans-serif; max-width: 500px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 8px;">
+    <h2 style="color: #1a1a2e;">ExpenseFlow Budget Update</h2>
+    <p style="color: #374151; font-size: 15px; line-height: 1.6;">
+      Your <strong>${budget.category.name}</strong> budget of
+      <strong>₹${budget.amount}</strong> for <strong>${budget.month}</strong>
+      has been ${status}.
+    </p>
+    <p style="color: #374151; font-size: 15px;">You've spent <strong>₹${spent}</strong> so far.</p>
+    <hr style="border: none; border-top: 1px solid #e5e7eb; margin: 20px 0;">
+    <p style="color: #9ca3af; font-size: 12px;">
+      You're receiving this because you set a budget alert in ExpenseFlow.
+      Manage your budgets anytime by logging into your account.
+    </p>
+  </div>
+`;
+
+                    const wasSent = await sendEmail(
                         user.email,
-                        "Budget Exceeded - ExpenseFlow",
-                        `Your ${budget.category.name} budget of ₹${budget.amount} for ${budget.month} has been exceeded. You've spent ₹${spent} so far.`
+                        `Budget ${status === "exceeded" ? "Exceeded" : "Reached"} - ExpenseFlow`,
+                        emailText,
+                        emailHtml
                     );
 
-                    budget.alertSent = true;
-                    await budget.save();
+                    if (wasSent) {
+                        budget.alertSent = true;
+                        await budget.save();
+                    }
                 }
             }
         } catch (err) {

@@ -5,7 +5,7 @@ const User = require("../models/user");
 const sendEmail = require("./sendEmail");
 
 function startRecurringJob() {
-    cron.schedule("* * * * *", async () => {
+    cron.schedule("0 1 * * *", async () => {
         console.log("Running recurring transactions check...");
 
         const today = new Date();
@@ -48,7 +48,7 @@ function startRecurringJob() {
         }
     });
 
-    cron.schedule("* * * * *", async () => {
+    cron.schedule("0 2 * * *", async () => {
         console.log("Running budget alert check...");
 
         try {
